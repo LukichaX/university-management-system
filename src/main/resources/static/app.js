@@ -93,8 +93,10 @@ function initSession() {
     if (userRole === 'ADMIN') {
         adminSection.classList.remove('hidden');
         document.getElementById('courseActionHeader').classList.remove('hidden');
+        populateLectorDropdowns();
     } else if (userRole === 'LECTOR') {
         lectorSection.classList.remove('hidden');
+        populateStudentDropdown();
     } else if (userRole === 'STUDENT') {
         studentSection.classList.remove('hidden');
         document.getElementById('courseActionHeader').classList.remove('hidden');
@@ -103,6 +105,34 @@ function initSession() {
     }
     
     loadAllCourses();
+}
+
+async function populateLectorDropdowns() {
+    const res = await fetchAuth('/users?role=LECTOR');
+    if (res.ok) {
+        const lectors = await res.json();
+        const courseLectorSelect = document.getElementById('courseLectorId');
+        const modalLectorSelect = document.getElementById('newLectorId');
+        
+        let options = '<option value="">-- Unassigned --</option>';
+        lectors.forEach(l => options += `<option value="${l.id}">${l.email}</option>`);
+        courseLectorSelect.innerHTML = options;
+        
+        let modalOptions = '<option value="">-- Select Lector --</option>';
+        lectors.forEach(l => modalOptions += `<option value="${l.id}">${l.email}</option>`);
+        modalLectorSelect.innerHTML = modalOptions;
+    }
+}
+
+async function populateStudentDropdown() {
+    const res = await fetchAuth('/users?role=STUDENT');
+    if (res.ok) {
+        const students = await res.json();
+        const studentSelect = document.getElementById('gradeStudentId');
+        let options = '<option value="">-- Select Student --</option>';
+        students.forEach(s => options += `<option value="${s.id}">${s.email}</option>`);
+        studentSelect.innerHTML = options;
+    }
 }
 
 // Logout
@@ -224,7 +254,9 @@ async function loadAllCourses() {
         if(page.content.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500 italic">No courses available.</td></tr>';
         } else {
+            let courseOptions = '<option value="">-- Select Course --</option>';
             page.content.forEach(c => {
+                courseOptions += `<option value="${c.id}">${c.name}</option>`;
                 let actionHtml = '';
                 if (userRole === 'STUDENT') {
                     actionHtml = `<button onclick="enrollCourse(${c.id})" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">Enroll</button>`;
@@ -247,6 +279,9 @@ async function loadAllCourses() {
                     </tr>
                 `;
             });
+            if (userRole === 'LECTOR') {
+                document.getElementById('gradeCourseId').innerHTML = courseOptions;
+            }
         }
     }
 }

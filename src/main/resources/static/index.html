@@ -83,8 +83,10 @@
                                 <input type="number" id="courseCredits" required min="1" class="w-full border px-3 py-2 rounded">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">Lector ID (Optional)</label>
-                                <input type="number" id="courseLectorId" class="w-full border px-3 py-2 rounded">
+                                <label class="block text-sm font-medium mb-1">Lector (Optional)</label>
+                                <select id="courseLectorId" class="w-full border px-3 py-2 rounded">
+                                    <option value="">-- Unassigned --</option>
+                                </select>
                             </div>
                             <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Create Course</button>
                         </form>
@@ -98,12 +100,16 @@
                     <h3 class="text-xl font-semibold mb-4 border-b pb-2">Assign Grade</h3>
                     <form id="gradeForm" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium mb-1">Student ID</label>
-                            <input type="number" id="gradeStudentId" required class="w-full border px-3 py-2 rounded">
+                            <label class="block text-sm font-medium mb-1">Student</label>
+                            <select id="gradeStudentId" required class="w-full border px-3 py-2 rounded">
+                                <option value="">-- Select Student --</option>
+                            </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">Course ID</label>
-                            <input type="number" id="gradeCourseId" required class="w-full border px-3 py-2 rounded">
+                            <label class="block text-sm font-medium mb-1">Course</label>
+                            <select id="gradeCourseId" required class="w-full border px-3 py-2 rounded">
+                                <option value="">-- Select Course --</option>
+                            </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-1">Score (0-100)</label>
@@ -200,7 +206,9 @@
     <div id="lectorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
         <div class="bg-white p-6 rounded shadow-md max-w-sm w-full">
             <h3 class="text-lg font-semibold mb-4">Change Lector for Course <span id="modalCourseId"></span></h3>
-            <input type="number" id="newLectorId" placeholder="New Lector ID" class="w-full border px-3 py-2 rounded mb-4">
+            <select id="newLectorId" class="w-full border px-3 py-2 rounded mb-4">
+                <option value="">-- Select Lector --</option>
+            </select>
             <div class="flex justify-end space-x-2">
                 <button onclick="closeLectorModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
                 <button onclick="submitChangeLector()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
