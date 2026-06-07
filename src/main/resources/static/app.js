@@ -9,6 +9,7 @@ const loginView = document.getElementById('loginView');
 const dashboardView = document.getElementById('dashboardView');
 const userInfo = document.getElementById('userInfo');
 const userRoleBadge = document.getElementById('userRoleBadge');
+const userEmailBadge = document.getElementById('userEmailBadge');
 const alertContainer = document.getElementById('alertContainer');
 
 const adminSection = document.getElementById('adminSection');
@@ -26,15 +27,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Helper: Show Alert
 function showAlert(message, type = 'error') {
-    const bg = type === 'error' ? 'bg-red-100 text-red-800 border-red-200' : 'bg-green-100 text-green-800 border-green-200';
-    alertContainer.innerHTML = `
-        <div class="p-4 rounded border ${bg} flex justify-between items-center shadow-sm">
-            <span>${message}</span>
-            <button onclick="this.parentElement.remove()" class="font-bold ml-4 text-xl">&times;</button>
+    const bg = type === 'error' ? 'bg-red-500/80 border-red-400' : 'bg-emerald-500/80 border-emerald-400';
+    const alertId = 'alert-' + Date.now();
+    const alertHtml = `
+        <div id="${alertId}" class="p-4 rounded-xl border ${bg} backdrop-blur-md text-white shadow-xl flex justify-between items-center transform transition-all duration-300 translate-x-10 opacity-0">
+            <div class="flex items-center gap-3">
+                ${type === 'error' ? 
+                    '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' : 
+                    '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'}
+                <span class="font-medium">${message}</span>
+            </div>
+            <button onclick="document.getElementById('${alertId}').remove()" class="text-white hover:text-gray-200 focus:outline-none">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
         </div>
     `;
+    alertContainer.insertAdjacentHTML('beforeend', alertHtml);
+    
+    // Animate in
+    requestAnimationFrame(() => {
+        const el = document.getElementById(alertId);
+        if(el) { el.classList.remove('translate-x-10', 'opacity-0'); }
+    });
+
+    // Auto remove
     setTimeout(() => {
-        alertContainer.innerHTML = '';
+        const el = document.getElementById(alertId);
+        if (el) {
+            el.classList.add('opacity-0', 'translate-x-10');
+            setTimeout(() => el.remove(), 300);
+        }
     }, 5000);
 }
 
@@ -55,7 +77,7 @@ async function fetchAuth(url, options = {}) {
     return response;
 }
 
-// Helper: Decode JWT to check expiration
+// Helper: Decode JWT to check expiration and get Email
 function parseJwt(token) {
     try {
         const base64Url = token.split('.')[1];
@@ -81,7 +103,8 @@ function initSession() {
     dashboardView.classList.remove('hidden');
     userInfo.classList.remove('hidden');
     
-    userRoleBadge.textContent = `Role: ${userRole}`;
+    userEmailBadge.textContent = payload.sub; // The user's email
+    userRoleBadge.textContent = userRole;
     
     // Switch views
     adminSection.classList.add('hidden');
@@ -165,14 +188,14 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     if (res.ok) {
         const data = await res.json();
         token = data.token;
-        userRole = data.role; // Now we get the exact role securely from the backend!
+        userRole = data.role; 
         
         localStorage.setItem('token', token);
         localStorage.setItem('role', userRole);
         
         document.getElementById('loginForm').reset();
         initSession();
-        showAlert('Login successful!', 'success');
+        showAlert('Welcome back!', 'success');
     } else {
         showAlert('Invalid email or password');
     }
@@ -194,6 +217,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         showAlert(`User ${email} registered successfully!`, 'success');
         document.getElementById('registerForm').reset();
         loadAllUsers();
+        populateLectorDropdowns();
     } else {
         const err = await res.json();
         showAlert(err.message || 'Failed to register user');
@@ -236,7 +260,7 @@ document.getElementById('gradeForm').addEventListener('submit', async (e) => {
     });
     
     if (res.ok) {
-        showAlert(`Grade assigned successfully!`, 'success');
+        showAlert(`Grade saved successfully!`, 'success');
         document.getElementById('gradeForm').reset();
     } else {
         const err = await res.json();
@@ -256,13 +280,16 @@ async function loadAllUsers() {
         const currentUserEmail = parseJwt(token).sub;
         
         users.forEach(u => {
-            let deleteBtn = u.email === currentUserEmail ? '' : `<button onclick="deleteUser(${u.id})" class="text-red-600 hover:text-red-800 text-sm font-semibold">Delete</button>`;
+            let deleteBtn = u.email === currentUserEmail ? 
+                '<span class="text-gray-500 italic text-xs">Current</span>' : 
+                `<button onclick="deleteUser(${u.id})" class="bg-red-500/20 hover:bg-red-500/40 text-red-300 border border-red-500/30 px-3 py-1 rounded-lg text-xs font-semibold transition-colors">Delete</button>`;
+            
             tbody.innerHTML += `
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="p-3">${u.id}</td>
-                    <td class="p-3">${u.email}</td>
-                    <td class="p-3">${u.role}</td>
-                    <td class="p-3 text-right">${deleteBtn}</td>
+                <tr class="hover:bg-white/10 transition-colors">
+                    <td class="p-4">${u.id}</td>
+                    <td class="p-4">${u.email}</td>
+                    <td class="p-4"><span class="bg-white/10 px-2 py-1 rounded text-xs font-semibold tracking-wider">${u.role}</span></td>
+                    <td class="p-4 text-right">${deleteBtn}</td>
                 </tr>
             `;
         });
@@ -307,7 +334,7 @@ async function loadAllCourses() {
         const userEmail = parseJwt(token).sub;
         
         if(page.content.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500 italic">No courses available.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-300 italic">No courses available.</td></tr>';
         } else {
             let courseOptions = '<option value="">-- Select Course --</option>';
             page.content.forEach(c => {
@@ -317,24 +344,24 @@ async function loadAllCourses() {
                 
                 let actionHtml = '';
                 if (userRole === 'STUDENT') {
-                    actionHtml = `<button onclick="enrollCourse(${c.id})" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">Enroll</button>`;
+                    actionHtml = `<button onclick="enrollCourse(${c.id})" class="bg-indigo-500/30 hover:bg-indigo-500/50 text-indigo-200 border border-indigo-500/30 px-3 py-1 rounded-lg text-xs font-semibold transition-colors">Enroll</button>`;
                 } else if (userRole === 'ADMIN') {
                     actionHtml = `
                         <div class="flex justify-end space-x-2">
-                            <button onclick="openLectorModal(${c.id})" class="text-blue-600 hover:text-blue-800 text-sm">Change Lector</button>
-                            ${c.lectorEmail ? `<button onclick="removeLector(${c.id})" class="text-yellow-600 hover:text-yellow-800 text-sm">Remove</button>` : ''}
-                            <button onclick="deleteCourse(${c.id})" class="text-red-600 hover:text-red-800 text-sm">Delete</button>
+                            <button onclick="openLectorModal(${c.id})" class="bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 border border-blue-500/30 px-3 py-1 rounded-lg text-xs font-semibold transition-colors">Change Lector</button>
+                            ${c.lectorEmail ? `<button onclick="removeLector(${c.id})" class="bg-orange-500/20 hover:bg-orange-500/40 text-orange-200 border border-orange-500/30 px-3 py-1 rounded-lg text-xs font-semibold transition-colors">Remove Lector</button>` : ''}
+                            <button onclick="deleteCourse(${c.id})" class="bg-red-500/20 hover:bg-red-500/40 text-red-200 border border-red-500/30 px-3 py-1 rounded-lg text-xs font-semibold transition-colors">Delete</button>
                         </div>
                     `;
                 }
 
                 tbody.innerHTML += `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="p-3">${c.id}</td>
-                        <td class="p-3">${c.name}</td>
-                        <td class="p-3">${c.credits}</td>
-                        <td class="p-3">${c.lectorEmail || '<span class="text-gray-400 italic">Unassigned</span>'}</td>
-                        ${(userRole === 'STUDENT' || userRole === 'ADMIN') ? `<td class="p-3 text-right">${actionHtml}</td>` : ''}
+                    <tr class="hover:bg-white/10 transition-colors">
+                        <td class="p-4">${c.id}</td>
+                        <td class="p-4 font-medium">${c.name}</td>
+                        <td class="p-4">${c.credits}</td>
+                        <td class="p-4">${c.lectorEmail || '<span class="text-gray-400 italic text-sm">Unassigned</span>'}</td>
+                        ${(userRole === 'STUDENT' || userRole === 'ADMIN') ? `<td class="p-4 text-right">${actionHtml}</td>` : ''}
                     </tr>
                 `;
             });
@@ -365,17 +392,19 @@ async function loadMyGrades() {
             
             grades.forEach(g => {
                 totalScore += g.score;
+                let colorClass = g.score >= 90 ? 'text-emerald-400' : g.score >= 70 ? 'text-blue-400' : g.score >= 50 ? 'text-yellow-400' : 'text-red-400';
+                
                 tbody.innerHTML += `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="p-3">${g.courseId}</td>
-                        <td class="p-3">${g.courseName}</td>
-                        <td class="p-3 font-bold text-right">${g.score}</td>
+                    <tr class="hover:bg-white/10 transition-colors">
+                        <td class="p-4">${g.courseId}</td>
+                        <td class="p-4">${g.courseName}</td>
+                        <td class="p-4 font-bold text-right ${colorClass}">${g.score}</td>
                     </tr>
                 `;
             });
             
             const avg = (totalScore / grades.length).toFixed(1);
-            gpaBadge.textContent = `Average Score: ${avg}`;
+            gpaBadge.textContent = `Average: ${avg}`;
         }
     }
 }
@@ -395,11 +424,11 @@ async function loadMyCourses() {
             noMyCoursesMsg.classList.add('hidden');
             courses.forEach(c => {
                 tbody.innerHTML += `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="p-3">${c.id}</td>
-                        <td class="p-3">${c.name}</td>
-                        <td class="p-3">${c.credits}</td>
-                        <td class="p-3">${c.lectorEmail || '<span class="text-gray-400 italic">Unassigned</span>'}</td>
+                    <tr class="hover:bg-white/10 transition-colors">
+                        <td class="p-4">${c.id}</td>
+                        <td class="p-4 font-medium">${c.name}</td>
+                        <td class="p-4">${c.credits}</td>
+                        <td class="p-4">${c.lectorEmail || '<span class="text-gray-400 italic text-sm">Unassigned</span>'}</td>
                     </tr>
                 `;
             });
@@ -411,7 +440,7 @@ document.getElementById('refreshMyCoursesBtn')?.addEventListener('click', loadMy
 window.enrollCourse = async function(courseId) {
     const res = await fetchAuth(`/courses/${courseId}/enroll`, { method: 'POST' });
     if (res.ok) {
-        showAlert('Enrolled successfully!', 'success');
+        showAlert('Successfully enrolled!', 'success');
         loadMyCourses();
     } else {
         const err = await res.json();

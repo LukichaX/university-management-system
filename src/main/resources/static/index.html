@@ -7,109 +7,138 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .hidden { display: none !important; }
+        /* Custom scrollbar for modern feel */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+        /* Fix select options styling */
+        option { background-color: #1e1b4b; color: white; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans min-h-screen">
+<body class="bg-gradient-to-br from-indigo-800 via-purple-700 to-pink-600 text-white font-sans min-h-screen overflow-x-hidden antialiased">
 
-    <!-- Navbar -->
-    <nav class="bg-blue-900 text-white p-4 shadow-md flex justify-between items-center">
-        <h1 class="text-xl font-bold">University Management Dashboard</h1>
-        <div id="userInfo" class="hidden flex items-center space-x-4">
-            <span id="userRoleBadge" class="bg-blue-700 px-3 py-1 rounded text-sm font-semibold"></span>
-            <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 px-3 py-1 rounded text-sm transition-colors">Logout</button>
+    <!-- Navbar / Header -->
+    <nav class="bg-white/10 backdrop-blur-md border-b border-white/20 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-pink-500 to-indigo-500 flex items-center justify-center font-bold text-lg shadow-lg">U</div>
+                    <h1 class="text-xl font-bold tracking-wider">UniManage</h1>
+                </div>
+                <div id="userInfo" class="hidden flex items-center space-x-4">
+                    <div class="text-right">
+                        <div id="userEmailBadge" class="text-sm font-medium text-gray-200"></div>
+                        <div id="userRoleBadge" class="text-xs font-bold text-pink-300 uppercase tracking-wider"></div>
+                    </div>
+                    <button id="logoutBtn" class="bg-red-500/80 hover:bg-red-600 text-white px-4 py-2 rounded-xl backdrop-blur-sm border border-red-500/50 transition-all duration-300 shadow-lg font-medium text-sm">Logout</button>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
-        <!-- Error/Success Alerts -->
-        <div id="alertContainer" class="mb-4"></div>
+    <!-- Floating Alerts -->
+    <div id="alertContainer" class="fixed top-20 right-4 z-50 flex flex-col gap-2 w-full max-w-sm"></div>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-8">
 
         <!-- Login View -->
-        <div id="loginView" class="max-w-md mx-auto bg-white p-6 rounded shadow-md mt-10">
-            <h2 class="text-2xl font-semibold mb-6 text-center text-blue-900">Sign In</h2>
-            <form id="loginForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">Email</label>
-                    <input type="email" id="loginEmail" required class="w-full border px-3 py-2 rounded focus:outline-none focus:ring focus:border-blue-500">
+        <div id="loginView" class="max-w-md mx-auto mt-20">
+            <div class="bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl rounded-2xl p-8 relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-pink-500 rounded-full mix-blend-multiply filter blur-2xl opacity-50"></div>
+                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-indigo-500 rounded-full mix-blend-multiply filter blur-2xl opacity-50"></div>
+                
+                <div class="relative z-10">
+                    <h2 class="text-3xl font-bold mb-2 text-center">Welcome Back</h2>
+                    <p class="text-center text-gray-300 mb-8 text-sm">Sign in to your account</p>
+                    
+                    <form id="loginForm" class="space-y-5">
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-200">Email Address</label>
+                            <input type="email" id="loginEmail" required class="w-full bg-black/20 border border-white/10 text-white focus:ring-2 focus:ring-pink-400 placeholder-gray-400 rounded-xl px-4 py-3 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-200">Password</label>
+                            <input type="password" id="loginPassword" required class="w-full bg-black/20 border border-white/10 text-white focus:ring-2 focus:ring-pink-400 placeholder-gray-400 rounded-xl px-4 py-3 outline-none transition-all">
+                        </div>
+                        <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 rounded-xl transition-all duration-300 shadow-[0_0_15px_rgba(236,72,153,0.5)] transform hover:scale-[1.02]">Sign In</button>
+                    </form>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Password</label>
-                    <input type="password" id="loginPassword" required class="w-full border px-3 py-2 rounded focus:outline-none focus:ring focus:border-blue-500">
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition-colors">Login</button>
-            </form>
+            </div>
         </div>
 
         <!-- Dashboard View (Wrapper) -->
-        <div id="dashboardView" class="hidden space-y-8 mt-4">
+        <div id="dashboardView" class="hidden space-y-8">
 
             <!-- Admin Section -->
             <div id="adminSection" class="hidden space-y-8">
                 <div class="grid md:grid-cols-2 gap-8">
                     <!-- Register User -->
-                    <div class="bg-white p-6 rounded shadow-md">
-                        <h3 class="text-xl font-semibold mb-4 border-b pb-2">Register New User</h3>
+                    <div class="bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-6">
+                        <h3 class="text-xl font-semibold mb-4 border-b border-white/20 pb-2 text-pink-200">Register New User</h3>
                         <form id="registerForm" class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium mb-1">Email</label>
-                                <input type="email" id="regEmail" required class="w-full border px-3 py-2 rounded">
+                                <label class="block text-sm font-medium mb-1 text-gray-300">Email</label>
+                                <input type="email" id="regEmail" required class="w-full bg-black/20 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-2 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">Password</label>
-                                <input type="password" id="regPassword" required minlength="6" class="w-full border px-3 py-2 rounded">
+                                <label class="block text-sm font-medium mb-1 text-gray-300">Password</label>
+                                <input type="password" id="regPassword" required minlength="6" class="w-full bg-black/20 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-2 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">Role</label>
-                                <select id="regRole" required class="w-full border px-3 py-2 rounded">
+                                <label class="block text-sm font-medium mb-1 text-gray-300">Role</label>
+                                <select id="regRole" required class="w-full bg-black/20 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-2 outline-none">
                                     <option value="STUDENT">STUDENT</option>
                                     <option value="LECTOR">LECTOR</option>
                                     <option value="ADMIN">ADMIN</option>
                                 </select>
                             </div>
-                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Register User</button>
+                            <button type="submit" class="bg-white/20 hover:bg-white/30 text-white w-full py-2 rounded-xl backdrop-blur-sm border border-white/30 transition-all font-semibold shadow-lg mt-2">Register User</button>
                         </form>
                     </div>
 
                     <!-- Create Course -->
-                    <div class="bg-white p-6 rounded shadow-md">
-                        <h3 class="text-xl font-semibold mb-4 border-b pb-2">Create New Course</h3>
+                    <div class="bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-6">
+                        <h3 class="text-xl font-semibold mb-4 border-b border-white/20 pb-2 text-pink-200">Create New Course</h3>
                         <form id="courseForm" class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium mb-1">Course Name</label>
-                                <input type="text" id="courseName" required class="w-full border px-3 py-2 rounded">
+                                <label class="block text-sm font-medium mb-1 text-gray-300">Course Name</label>
+                                <input type="text" id="courseName" required class="w-full bg-black/20 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-2 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">Credits</label>
-                                <input type="number" id="courseCredits" required min="1" class="w-full border px-3 py-2 rounded">
+                                <label class="block text-sm font-medium mb-1 text-gray-300">Credits</label>
+                                <input type="number" id="courseCredits" required min="1" class="w-full bg-black/20 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-2 outline-none">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium mb-1">Lector (Optional)</label>
-                                <select id="courseLectorId" class="w-full border px-3 py-2 rounded">
+                                <label class="block text-sm font-medium mb-1 text-gray-300">Lector (Optional)</label>
+                                <select id="courseLectorId" class="w-full bg-black/20 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-2 outline-none">
                                     <option value="">-- Unassigned --</option>
                                 </select>
                             </div>
-                            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Create Course</button>
+                            <button type="submit" class="bg-white/20 hover:bg-white/30 text-white w-full py-2 rounded-xl backdrop-blur-sm border border-white/30 transition-all font-semibold shadow-lg mt-2">Create Course</button>
                         </form>
                     </div>
                 </div>
 
                 <!-- User Management Section -->
-                <div class="bg-white p-6 rounded shadow-md mt-8">
-                    <div class="flex justify-between items-center mb-4 border-b pb-2">
-                        <h3 class="text-xl font-semibold">User Management</h3>
-                        <button id="refreshUsersBtn" class="text-blue-600 hover:underline text-sm font-medium">Refresh Users</button>
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-6">
+                    <div class="flex justify-between items-center mb-4 border-b border-white/20 pb-2">
+                        <h3 class="text-xl font-semibold text-pink-200">User Management</h3>
+                        <button id="refreshUsersBtn" class="text-pink-300 hover:text-pink-100 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Refresh
+                        </button>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-50 border-b">
-                                    <th class="p-3 font-semibold text-sm">ID</th>
-                                    <th class="p-3 font-semibold text-sm">Email</th>
-                                    <th class="p-3 font-semibold text-sm">Role</th>
-                                    <th class="p-3 font-semibold text-sm text-right">Action</th>
+                    <div class="overflow-x-auto rounded-lg border border-white/10">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead class="bg-black/20 text-gray-300 text-xs uppercase tracking-wider">
+                                <tr>
+                                    <th class="p-4 font-semibold">ID</th>
+                                    <th class="p-4 font-semibold">Email</th>
+                                    <th class="p-4 font-semibold">Role</th>
+                                    <th class="p-4 font-semibold text-right">Action</th>
                                 </tr>
                             </thead>
-                            <tbody id="usersTableBody">
+                            <tbody id="usersTableBody" class="divide-y divide-white/10 text-sm">
                                 <!-- Populated by JS -->
                             </tbody>
                         </table>
@@ -119,103 +148,107 @@
 
             <!-- Lector Section -->
             <div id="lectorSection" class="hidden">
-                <div class="bg-white p-6 rounded shadow-md max-w-md">
-                    <h3 class="text-xl font-semibold mb-4 border-b pb-2">Assign Grade</h3>
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-6 max-w-md mx-auto md:mx-0">
+                    <h3 class="text-xl font-semibold mb-4 border-b border-white/20 pb-2 text-pink-200">Assign Grade</h3>
                     <form id="gradeForm" class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium mb-1">Student</label>
-                            <select id="gradeStudentId" required class="w-full border px-3 py-2 rounded">
+                            <label class="block text-sm font-medium mb-1 text-gray-300">Student</label>
+                            <select id="gradeStudentId" required class="w-full bg-black/20 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-2 outline-none">
                                 <option value="">-- Select Student --</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">Course</label>
-                            <select id="gradeCourseId" required class="w-full border px-3 py-2 rounded">
+                            <label class="block text-sm font-medium mb-1 text-gray-300">Course</label>
+                            <select id="gradeCourseId" required class="w-full bg-black/20 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-2 outline-none">
                                 <option value="">-- Select Course --</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">Score (0-100)</label>
-                            <input type="number" id="gradeScore" required min="0" max="100" class="w-full border px-3 py-2 rounded">
+                            <label class="block text-sm font-medium mb-1 text-gray-300">Score (0-100)</label>
+                            <input type="number" id="gradeScore" required min="0" max="100" class="w-full bg-black/20 border border-white/10 text-white focus:ring-2 focus:ring-indigo-400 rounded-lg px-3 py-2 outline-none">
                         </div>
-                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full">Assign Grade</button>
+                        <button type="submit" class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white w-full py-2 rounded-xl backdrop-blur-sm border border-white/30 transition-all font-semibold shadow-lg mt-2 transform hover:scale-[1.02]">Assign / Update Grade</button>
                     </form>
                 </div>
             </div>
 
             <!-- Student Section -->
             <div id="studentSection" class="hidden space-y-8">
-                
                 <!-- My Grades & GPA -->
-                <div class="bg-white p-6 rounded shadow-md">
-                    <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-6">
+                    <div class="flex flex-wrap justify-between items-center mb-4 border-b border-white/20 pb-2 gap-4">
                         <div class="flex items-center space-x-4">
-                            <h3 class="text-xl font-semibold">My Grades</h3>
-                            <span id="studentGpaBadge" class="bg-blue-100 text-blue-800 px-3 py-1 rounded text-sm font-semibold">GPA: --</span>
+                            <h3 class="text-xl font-semibold text-pink-200">My Grades</h3>
+                            <span id="studentGpaBadge" class="bg-black/30 border border-white/20 text-white px-3 py-1 rounded-full text-sm font-bold shadow-inner">GPA: --</span>
                         </div>
-                        <button id="refreshGradesBtn" class="text-blue-600 hover:underline text-sm font-medium">Refresh Grades</button>
+                        <button id="refreshGradesBtn" class="text-pink-300 hover:text-pink-100 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Refresh
+                        </button>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-50 border-b">
-                                    <th class="p-3 font-semibold text-sm">Course ID</th>
-                                    <th class="p-3 font-semibold text-sm">Course Name</th>
-                                    <th class="p-3 font-semibold text-sm text-right">Score</th>
+                    <div class="overflow-x-auto rounded-lg border border-white/10">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead class="bg-black/20 text-gray-300 text-xs uppercase tracking-wider">
+                                <tr>
+                                    <th class="p-4 font-semibold">Course ID</th>
+                                    <th class="p-4 font-semibold">Course Name</th>
+                                    <th class="p-4 font-semibold text-right">Score</th>
                                 </tr>
                             </thead>
-                            <tbody id="gradesTableBody">
+                            <tbody id="gradesTableBody" class="divide-y divide-white/10 text-sm">
                                 <!-- Populated by JS -->
                             </tbody>
                         </table>
-                        <div id="noGradesMsg" class="hidden p-4 text-center text-gray-500 italic">No grades found.</div>
+                        <div id="noGradesMsg" class="hidden p-8 text-center text-gray-300 italic">No grades found.</div>
                     </div>
                 </div>
 
                 <!-- My Enrolled Courses -->
-                <div class="bg-white p-6 rounded shadow-md">
-                    <div class="flex justify-between items-center mb-4 border-b pb-2">
-                        <h3 class="text-xl font-semibold">My Enrolled Courses</h3>
-                        <button id="refreshMyCoursesBtn" class="text-blue-600 hover:underline text-sm font-medium">Refresh Enrolled</button>
+                <div class="bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-6">
+                    <div class="flex justify-between items-center mb-4 border-b border-white/20 pb-2">
+                        <h3 class="text-xl font-semibold text-pink-200">My Enrolled Courses</h3>
+                        <button id="refreshMyCoursesBtn" class="text-pink-300 hover:text-pink-100 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Refresh
+                        </button>
                     </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-50 border-b">
-                                    <th class="p-3 font-semibold text-sm">Course ID</th>
-                                    <th class="p-3 font-semibold text-sm">Course Name</th>
-                                    <th class="p-3 font-semibold text-sm">Credits</th>
-                                    <th class="p-3 font-semibold text-sm">Lector Email</th>
+                    <div class="overflow-x-auto rounded-lg border border-white/10">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead class="bg-black/20 text-gray-300 text-xs uppercase tracking-wider">
+                                <tr>
+                                    <th class="p-4 font-semibold">ID</th>
+                                    <th class="p-4 font-semibold">Name</th>
+                                    <th class="p-4 font-semibold">Credits</th>
+                                    <th class="p-4 font-semibold">Lector Email</th>
                                 </tr>
                             </thead>
-                            <tbody id="myCoursesTableBody">
+                            <tbody id="myCoursesTableBody" class="divide-y divide-white/10 text-sm">
                                 <!-- Populated by JS -->
                             </tbody>
                         </table>
-                        <div id="noMyCoursesMsg" class="hidden p-4 text-center text-gray-500 italic">You are not enrolled in any courses.</div>
+                        <div id="noMyCoursesMsg" class="hidden p-8 text-center text-gray-300 italic">You are not enrolled in any courses.</div>
                     </div>
                 </div>
-
             </div>
 
             <!-- All Courses Section (Visible to everyone authenticated) -->
-            <div class="bg-white p-6 rounded shadow-md">
-                <div class="flex justify-between items-center mb-4 border-b pb-2">
-                    <h3 class="text-xl font-semibold">All Courses</h3>
-                    <button id="refreshCoursesBtn" class="text-blue-600 hover:underline text-sm font-medium">Refresh Courses</button>
+            <div class="bg-white/10 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl p-6">
+                <div class="flex justify-between items-center mb-4 border-b border-white/20 pb-2">
+                    <h3 class="text-xl font-semibold text-pink-200">Course Catalog</h3>
+                    <button id="refreshCoursesBtn" class="text-pink-300 hover:text-pink-100 text-sm font-medium flex items-center gap-1 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Refresh
+                    </button>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50 border-b">
-                                <th class="p-3 font-semibold text-sm">ID</th>
-                                <th class="p-3 font-semibold text-sm">Name</th>
-                                <th class="p-3 font-semibold text-sm">Credits</th>
-                                <th class="p-3 font-semibold text-sm">Lector Email</th>
-                                <th id="courseActionHeader" class="p-3 font-semibold text-sm text-right hidden">Action</th>
+                <div class="overflow-x-auto rounded-lg border border-white/10">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead class="bg-black/20 text-gray-300 text-xs uppercase tracking-wider">
+                            <tr>
+                                <th class="p-4 font-semibold">ID</th>
+                                <th class="p-4 font-semibold">Name</th>
+                                <th class="p-4 font-semibold">Credits</th>
+                                <th class="p-4 font-semibold">Lector Email</th>
+                                <th id="courseActionHeader" class="p-4 font-semibold text-right hidden">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="coursesTableBody">
+                        <tbody id="coursesTableBody" class="divide-y divide-white/10 text-sm">
                             <!-- Populated by JS -->
                         </tbody>
                     </table>
@@ -226,15 +259,16 @@
     </div>
 
     <!-- Modal for Lector Change -->
-    <div id="lectorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div class="bg-white p-6 rounded shadow-md max-w-sm w-full">
-            <h3 class="text-lg font-semibold mb-4">Change Lector for Course <span id="modalCourseId"></span></h3>
-            <select id="newLectorId" class="w-full border px-3 py-2 rounded mb-4">
+    <div id="lectorModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-indigo-900/90 backdrop-blur-xl border border-white/20 p-6 rounded-2xl shadow-2xl max-w-sm w-full transform transition-all">
+            <h3 class="text-xl font-semibold mb-4 text-white border-b border-white/10 pb-2">Update Lector</h3>
+            <p class="text-gray-300 text-sm mb-4">Select a new Lector for Course <span id="modalCourseId" class="font-bold text-pink-400"></span>.</p>
+            <select id="newLectorId" class="w-full bg-black/30 border border-white/10 text-white focus:ring-2 focus:ring-pink-400 rounded-lg px-3 py-3 outline-none mb-6">
                 <option value="">-- Select Lector --</option>
             </select>
-            <div class="flex justify-end space-x-2">
-                <button onclick="closeLectorModal()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
-                <button onclick="submitChangeLector()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeLectorModal()" class="px-5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-medium border border-white/20">Cancel</button>
+                <button onclick="submitChangeLector()" class="px-5 py-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl font-bold shadow-lg transition-transform hover:scale-[1.02]">Save Changes</button>
             </div>
         </div>
     </div>
