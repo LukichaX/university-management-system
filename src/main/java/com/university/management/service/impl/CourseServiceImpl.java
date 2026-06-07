@@ -101,6 +101,19 @@ public class CourseServiceImpl implements CourseService {
         return toDto(courseRepository.save(course));
     }
 
+    @Override
+    @Transactional
+    public void deleteCourse(Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        
+        for (User student : course.getEnrolledStudents()) {
+            student.getEnrolledCourses().remove(course);
+        }
+        
+        courseRepository.delete(course);
+    }
+
     private CourseDto toDto(Course course) {
         User lector = course.getLector();
         return new CourseDto(

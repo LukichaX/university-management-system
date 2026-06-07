@@ -11,7 +11,9 @@ import com.university.management.exception.ValidationException;
 import com.university.management.repository.CourseRepository;
 import com.university.management.repository.GradeRepository;
 import com.university.management.repository.UserRepository;
+import com.university.management.security.CustomUserDetails;
 import com.university.management.service.GradeService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,11 +41,24 @@ public class GradeServiceImpl implements GradeService {
         Course course = courseRepository.findById(request.courseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + request.courseId()));
 
-        Grade grade = Grade.builder()
-                .student(student)
-                .course(course)
-                .score(request.score())
-                .build();
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long currentLectorId = userDetails.getUser().getId();
+
+        if (course.getLector() == null || !course.getLector().getId().equals(currentLectorId)) {
+            throw new ValidationException("You are not authorized to grade this course");
+        }
+
+        if (!student.getEnrolledCourses().contains(course)) {
+            throw new ValidationException("Student is not enrolled in this course");
+        }
+
+        Grade grade = gradeRepository.findByStudentIdAndCourseId(student.getId(), course.getId())
+                .orElseGet(() -> Grade.builder()
+                        .student(student)
+                        .course(course)
+                        .build());
+        
+        grade.setScore(request.score());
 
         grade = gradeRepository.save(grade);
         return toDto(grade);

@@ -92,6 +92,29 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- User Management Section -->
+                <div class="bg-white p-6 rounded shadow-md mt-8">
+                    <div class="flex justify-between items-center mb-4 border-b pb-2">
+                        <h3 class="text-xl font-semibold">User Management</h3>
+                        <button id="refreshUsersBtn" class="text-blue-600 hover:underline text-sm font-medium">Refresh Users</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 border-b">
+                                    <th class="p-3 font-semibold text-sm">ID</th>
+                                    <th class="p-3 font-semibold text-sm">Email</th>
+                                    <th class="p-3 font-semibold text-sm">Role</th>
+                                    <th class="p-3 font-semibold text-sm text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <!-- Lector Section -->

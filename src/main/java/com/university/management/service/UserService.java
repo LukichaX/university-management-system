@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface UserService {
     List<UserDto> getUsersByRole(Role role);
+
+    void deleteUser(Long userId);
 }

@@ -33,7 +33,7 @@ public class User {
     @Builder.Default
     private List<Course> courses = new ArrayList<>();
 
-    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Grade> grades = new ArrayList<>();
 

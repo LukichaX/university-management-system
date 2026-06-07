@@ -94,6 +94,7 @@ function initSession() {
         adminSection.classList.remove('hidden');
         document.getElementById('courseActionHeader').classList.remove('hidden');
         populateLectorDropdowns();
+        loadAllUsers();
     } else if (userRole === 'LECTOR') {
         lectorSection.classList.remove('hidden');
         populateStudentDropdown();
@@ -192,6 +193,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     if (res.ok) {
         showAlert(`User ${email} registered successfully!`, 'success');
         document.getElementById('registerForm').reset();
+        loadAllUsers();
     } else {
         const err = await res.json();
         showAlert(err.message || 'Failed to register user');
@@ -244,6 +246,57 @@ document.getElementById('gradeForm').addEventListener('submit', async (e) => {
 
 // Fetch Data Functions
 
+async function loadAllUsers() {
+    const res = await fetchAuth('/users');
+    if (res.ok) {
+        const users = await res.json();
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+        
+        const currentUserEmail = parseJwt(token).sub;
+        
+        users.forEach(u => {
+            let deleteBtn = u.email === currentUserEmail ? '' : `<button onclick="deleteUser(${u.id})" class="text-red-600 hover:text-red-800 text-sm font-semibold">Delete</button>`;
+            tbody.innerHTML += `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3">${u.id}</td>
+                    <td class="p-3">${u.email}</td>
+                    <td class="p-3">${u.role}</td>
+                    <td class="p-3 text-right">${deleteBtn}</td>
+                </tr>
+            `;
+        });
+    }
+}
+document.getElementById('refreshUsersBtn')?.addEventListener('click', loadAllUsers);
+
+window.deleteUser = async function(userId) {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) return;
+    
+    const res = await fetchAuth(`/users/${userId}`, { method: 'DELETE' });
+    if (res.ok) {
+        showAlert('User deleted successfully!', 'success');
+        loadAllUsers();
+        populateLectorDropdowns();
+    } else {
+        const err = await res.json();
+        showAlert(err.message || 'Failed to delete user');
+    }
+}
+
+window.deleteCourse = async function(courseId) {
+    if (!confirm('Are you sure you want to delete this course? All associated grades will be lost.')) return;
+    
+    const res = await fetchAuth(`/courses/${courseId}`, { method: 'DELETE' });
+    if (res.ok) {
+        showAlert('Course deleted successfully!', 'success');
+        loadAllCourses();
+    } else {
+        const err = await res.json();
+        showAlert(err.message || 'Failed to delete course');
+    }
+}
+
 async function loadAllCourses() {
     const res = await fetchAuth('/courses?page=0&size=100');
     if (res.ok) {
@@ -251,12 +304,17 @@ async function loadAllCourses() {
         const tbody = document.getElementById('coursesTableBody');
         tbody.innerHTML = '';
         
+        const userEmail = parseJwt(token).sub;
+        
         if(page.content.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500 italic">No courses available.</td></tr>';
         } else {
             let courseOptions = '<option value="">-- Select Course --</option>';
             page.content.forEach(c => {
-                courseOptions += `<option value="${c.id}">${c.name}</option>`;
+                if (userRole === 'LECTOR' && c.lectorEmail === userEmail) {
+                    courseOptions += `<option value="${c.id}">${c.name}</option>`;
+                }
+                
                 let actionHtml = '';
                 if (userRole === 'STUDENT') {
                     actionHtml = `<button onclick="enrollCourse(${c.id})" class="text-blue-600 hover:text-blue-800 text-sm font-semibold">Enroll</button>`;
@@ -264,7 +322,8 @@ async function loadAllCourses() {
                     actionHtml = `
                         <div class="flex justify-end space-x-2">
                             <button onclick="openLectorModal(${c.id})" class="text-blue-600 hover:text-blue-800 text-sm">Change Lector</button>
-                            ${c.lectorEmail ? `<button onclick="removeLector(${c.id})" class="text-red-600 hover:text-red-800 text-sm">Remove</button>` : ''}
+                            ${c.lectorEmail ? `<button onclick="removeLector(${c.id})" class="text-yellow-600 hover:text-yellow-800 text-sm">Remove</button>` : ''}
+                            <button onclick="deleteCourse(${c.id})" class="text-red-600 hover:text-red-800 text-sm">Delete</button>
                         </div>
                     `;
                 }

@@ -29,7 +29,7 @@ public class Course {
     @JoinColumn(name = "lector_id")
     private User lector;
 
-    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "course", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Grade> grades = new ArrayList<>();
 

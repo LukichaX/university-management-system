@@ -18,4 +18,6 @@ public interface CourseService {
     CourseDto updateCourseLector(Long courseId, Long lectorId);
 
     CourseDto removeCourseLector(Long courseId);
+
+    void deleteCourse(Long courseId);
 }
